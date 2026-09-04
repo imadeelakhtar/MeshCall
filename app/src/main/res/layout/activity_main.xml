@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorSurface"
+            android:theme="@style/ThemeOverlay.AppCompat.Light"
+            app:titleTextColor="?android:textColorPrimary"
+            app:subtitleTextColor="?android:textColorSecondary"
+            app:title="MeshCall"
+            app:subtitle="" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- HOME DASHBOARD STATE -->
+    <include
+        android:id="@+id/homeDashboardContainer"
+        layout="@layout/layout_home_dashboard"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="visible" />
+        
+    <!-- MESH CALL PLACEHOLDER STATE -->
+    <include
+        android:id="@+id/meshCallPlaceholderContainer"
+        layout="@layout/layout_mesh_call_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone" />
+
+    <!-- CONVERSATIONS STATE -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/conversationsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewConversations"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="80dp" />
+
+        <TextView
+            android:id="@+id/textEmptyConversations"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="No conversations yet.\nTap + to find someone nearby."
+            android:textAlignment="center"
+            android:textColor="?android:textColorSecondary"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabNewChat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="24dp"
+            android:src="@drawable/ic_baseline_add_24"
+            app:backgroundTint="?attr/colorPrimary"
+            app:tint="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- DISCOVERY STATE -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/discoveryContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/buttonDiscover"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_premium_button"
+            android:text="Discover Peers"
+            android:textColor="#FFFFFF"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/textDiscoveryStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Searching for peers..."
+            android:textColor="?android:textColorSecondary"
+            app:layout_constraintTop_toBottomOf="@id/buttonDiscover"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewPeers"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintTop_toBottomOf="@id/textDiscoveryStatus"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include
+        android:id="@+id/includeConnectionRequest"
+        layout="@layout/layout_connection_request"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <include
+        android:id="@+id/includeConnectedMenu"
+        layout="@layout/layout_connected_menu"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- CHAT STATE -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chatContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_chat_ambient"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone">
+
+        <include
+            android:id="@+id/chatHeader"
+            layout="@layout/layout_chat_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerViewChat"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:paddingBottom="16dp"
+            android:clipToPadding="false"
+            app:layout_constraintTop_toBottomOf="@id/chatHeader"
+            app:layout_constraintBottom_toTopOf="@id/layoutMessageInput" />
+
+        <LinearLayout
+            android:id="@+id/layoutMessageInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="12dp"
+            android:gravity="center_vertical"
+            android:background="#66000000"
+            android:elevation="0dp"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <ImageButton
+                android:id="@+id/buttonChatAttachment"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/ic_add_premium"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Attachment"
+                app:tint="?attr/colorPrimary" />
+
+            <TextView
+                android:id="@+id/textRecordingStatus"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Recording... (Release to send)"
+                android:textColor="?attr/colorSecondary"
+                android:textStyle="bold"
+                android:padding="12dp"
+                android:background="@drawable/bg_glass_input"
+                android:visibility="gone" />
+
+            <EditText
+                android:id="@+id/editTextMessage"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:hint="Message..."
+                android:inputType="textShortMessage"
+                android:background="@drawable/bg_glass_input"
+                android:paddingHorizontal="20dp"
+                android:paddingVertical="14dp"
+                android:maxLines="4"
+                android:textColor="?android:textColorPrimary"
+                android:textColorHint="?android:textColorSecondary"/>
+
+            <ImageButton
+                android:id="@+id/buttonSend"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_send_premium"
+                android:background="@drawable/bg_glass_circle_active"
+                android:backgroundTint="?attr/colorPrimary"
+                android:contentDescription="Send"
+                android:padding="12dp"
+                android:scaleType="centerInside"
+                app:tint="#FFFFFF" />
+
+            <ImageButton
+                android:id="@+id/buttonMic"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:src="@drawable/ic_mic_premium"
+                android:background="@drawable/bg_glass_circle_active"
+                android:backgroundTint="?attr/colorSurface"
+                android:contentDescription="Record Voice Message"
+                android:padding="12dp"
+                android:scaleType="centerInside"
+                app:tint="?attr/colorPrimary" />
+
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <include
+        android:id="@+id/includeCallIncoming"
+        layout="@layout/layout_call_incoming"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <include
+        android:id="@+id/includeCallActive"
+        layout="@layout/layout_call_active"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

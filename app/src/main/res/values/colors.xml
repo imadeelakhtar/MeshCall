@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Premium Brand Colors -->
+    <color name="meshcall_primary">#6366F1</color> <!-- Indigo -->
+    <color name="meshcall_primary_variant">#4F46E5</color>
+    <color name="meshcall_on_primary">#FFFFFF</color>
+    
+    <color name="meshcall_secondary">#A855F7</color> <!-- Purple Accent -->
+    <color name="meshcall_secondary_variant">#9333EA</color>
+    <color name="meshcall_on_secondary">#FFFFFF</color>
+    
+    <!-- Light Theme -->
+    <color name="meshcall_bg">#F8FAFC</color>
+    <color name="meshcall_surface">#FFFFFF</color>
+    <color name="meshcall_text_primary">#0F172A</color>
+    <color name="meshcall_text_secondary">#64748B</color>
+    <color name="meshcall_glass_surface">#B3FFFFFF</color>
+    <color name="meshcall_glass_border">#33FFFFFF</color>
+    
+    <!-- Dark Theme (Premium Navy/Black) -->
+    <color name="meshcall_bg_dark">#0B0E14</color>
+    <color name="meshcall_surface_dark">#131620</color>
+    <color name="meshcall_text_primary_dark">#F8FAFC</color>
+    <color name="meshcall_text_secondary_dark">#94A3B8</color>
+    <color name="meshcall_glass_surface_dark">#1AFFFFFF</color>
+    <color name="meshcall_glass_border_dark">#1AFFFFFF</color>
+    
+    <!-- Glass Accents -->
+    <color name="meshcall_glass_accent_start">#996366F1</color>
+    <color name="meshcall_glass_accent_end">#99A855F7</color>
+    
+    <!-- Status Colors -->
+    <color name="meshcall_success">#10B981</color>
+    <color name="meshcall_error">#EF4444</color>
+    
+    <!-- Calling Action Colors -->
+    <color name="meshcall_call_accept">#10B981</color>
+    <color name="meshcall_call_decline">#EF4444</color>
+    <color name="meshcall_call_end">#EF4444</color>
+</resources>

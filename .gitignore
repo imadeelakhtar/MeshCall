@@ -1,0 +1,51 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+app/build/
+local.properties
+
+# Built application files
+*.apk
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+*/build/
+*/*/build/
+
+# Keystore files
+*.jks
+*.keystore
+*.key
+*.pem
+*.pk8
+
+# Passwords/API keys/tokens (if accidentally placed in project)
+secrets.properties
+credentials.json
+api_keys.xml
+
+# Machine-specific files
+.idea/
+.cxx/
+*.log

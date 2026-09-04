@@ -1,0 +1,157 @@
+                                val transportPeerId = peerConn?.peerId ?: peerConn?.tempId
+                                val convId = peerConn?.profile?.userId ?: return
+                                val chatMsg = ChatMessage(
+                                    id = messageId,
+                                    conversationId = convId,
+                                    text = msg,
+                                    isSent = false,
+                                    type = MessageType.TEXT,
+                                    state = if (isAppInForeground) MessageState.SEEN else MessageState.DELIVERED
+                                )
+                                dbHelper.insertMessage(chatMsg)
+                                dbHelper.insertOrUpdateConversation(
+                                    convId, peerConn?.profile?.username ?: "", peerConn?.profile?.displayName ?: "", peerConn?.profile?.avatarUri ?: "",
+                                    msg, MessageType.TEXT.ordinal, chatMsg.timestamp,
+                                    unreadIncrement = if (isAppInForeground) 0 else 1
+                                )
+                                observer?.onMessageReceived(chatMsg)
+                                
+                                if (isAppInForeground) {
+                                    socketManager?.sendAck(SocketManager.TYPE_SEEN_ACK, messageId, peerId = transportPeerId)
+                                } else {
+                                    socketManager?.sendAck(SocketManager.TYPE_DELIVERY_ACK, messageId, peerId = transportPeerId)
+                                    showIncomingMessageNotification(msg, convId)
+                                }
+                            }
+                        }
+                        SocketManager.TYPE_VOICE -> {
+                            Log.i(TAG, "Socket voice message received: ${payload.size} bytes")
+                            try {
+                                val audioFile = java.io.File(cacheDir, "voice_rx_${System.currentTimeMillis()}.m4a")
+                                audioFile.writeBytes(payload)
+                                
+                                val transportPeerId = peerConn?.peerId ?: peerConn?.tempId
+                                val convId = peerConn?.profile?.userId ?: return
+                                val chatMsg = ChatMessage(
+                                    id = messageId,
+                                    conversationId = convId,
+                                    isSent = false,
+                                    type = MessageType.VOICE,
+                                    audioPath = audioFile.absolutePath,
+                                    durationMs = 0L,
+                                    state = if (isAppInForeground) MessageState.SEEN else MessageState.DELIVERED
+                                )
+                                dbHelper.insertMessage(chatMsg)
+                                dbHelper.insertOrUpdateConversation(
+                                    convId, peerConn?.profile?.username ?: "", peerConn?.profile?.displayName ?: "", peerConn?.profile?.avatarUri ?: "",
+                                    "??? Voice message", MessageType.VOICE.ordinal, chatMsg.timestamp,
+                                    unreadIncrement = if (isAppInForeground) 0 else 1
+                                )
+                                observer?.onMessageReceived(chatMsg)
+                                
+                                if (isAppInForeground) {
+                                    socketManager?.sendAck(SocketManager.TYPE_SEEN_ACK, messageId, peerId = transportPeerId)
+                                } else {
+                                    socketManager?.sendAck(SocketManager.TYPE_DELIVERY_ACK, messageId, peerId = transportPeerId)
+                                    showIncomingMessageNotification("??? Voice message", convId)
+                                }
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Failed to save received voice message", e)
+                            }
+                        }
+                        SocketManager.TYPE_DELIVERY_ACK -> {
+                            Log.i(TAG, "RECEIVE_DELIVERY_ACK: id=$messageId")
+                            dbHelper.updateMessageState(messageId, MessageState.DELIVERED)
+                            val convId = peerConn?.profile?.userId ?: return
+                            val msgs = dbHelper.getMessagesForConversation(convId)
+                            val msg = msgs.find { it.id == messageId }
+                            if (msg != null) observer?.onMessageReceived(msg) // Force UI update
+                        }
+                        SocketManager.TYPE_SEEN_ACK -> {
+                            Log.i(TAG, "RECEIVE_SEEN_ACK: id=$messageId")
+                            dbHelper.updateMessageState(messageId, MessageState.SEEN)
+                            val convId = peerConn?.profile?.userId ?: return
+                            val msgs = dbHelper.getMessagesForConversation(convId)
+                            val msg = msgs.find { it.id == messageId }
+                            if (msg != null) observer?.onMessageReceived(msg) // Force UI update
+                        }
+                        SocketManager.TYPE_REACTION_ADD -> {
+                            val reaction = String(payload, Charsets.UTF_8)
+                            dbHelper.addReaction(messageId, reaction)
+                            val convId = peerConn?.profile?.userId ?: return
+                            val msgs = dbHelper.getMessagesForConversation(convId)
+                            val msg = msgs.find { it.id == messageId }
+                            if (msg != null) observer?.onMessageReceived(msg)
+                        }
+                        SocketManager.TYPE_REACTION_REMOVE -> {
+                            val reaction = String(payload, Charsets.UTF_8)
+                            dbHelper.removeReaction(messageId, reaction)
+                            val convId = peerConn?.profile?.userId ?: return
+                            val msgs = dbHelper.getMessagesForConversation(convId)
+                            val msg = msgs.find { it.id == messageId }
+                            if (msg != null) observer?.onMessageReceived(msg)
+                        }
+                        SocketManager.TYPE_MESSAGE_DELETE -> {
+                            val msg = dbHelper.getMessage(messageId)
+                            if (msg != null && !msg.isSent) {
+                                safeDeleteLocalFile(msg)
+                                dbHelper.deleteMessage(messageId)
+                                observer?.onMessageDeleted(messageId)
+                            }
+                        }
+                        SocketManager.TYPE_FILE_METADATA -> {
+                            val jsonStr = String(payload, Charsets.UTF_8)
+                            val json = org.json.JSONObject(jsonStr)
+                            val fileName = json.getString("fileName")
+                            val mimeType = json.getString("mimeType")
+                            val fileSize = json.getLong("fileSize")
+                            
+                            Log.i(TAG, "FILE_METADATA_RECEIVED\nmessageId=$messageId\nfileName=$fileName\nmimeType=$mimeType\nfileSize=$fileSize")
+                            
+                            val finalDir = getExternalFilesDir(android.os.Environment.DIRECTORY_DOCUMENTS)
+                            val tempFile = java.io.File(finalDir, "rx_${messageId}.tmp")
+                            incomingFiles[messageId] = IncomingFileState(
+                                tempFile = tempFile,
+                                fileName = fileName,
+                                mimeType = mimeType,
+                                fileSize = fileSize,
+                                bytesReceived = 0L
+                            )
+                            
+                            Log.i(TAG, "FILE_RECEIVE_STATE_CREATED\nmessageId=$messageId")
+                            
+                            val type = if (mimeType.startsWith("image/")) MessageType.IMAGE else MessageType.FILE
+                            val convId = peerConn?.profile?.userId ?: return
+                            val chatMsg = ChatMessage(
+                                id = messageId,
+                                conversationId = convId,
+                                isSent = false,
+                                type = type,
+                                fileName = fileName,
+                                mimeType = mimeType,
+                                fileSize = fileSize,
+                                state = MessageState.SENDING,
+                                progress = 0
+                            )
+                            dbHelper.insertMessage(chatMsg)
+                            observer?.onMessageReceived(chatMsg)
+                        }
+                        SocketManager.TYPE_FILE_CHUNK -> {
+                            val state = incomingFiles[messageId] ?: return
+                            try {
+                                java.io.FileOutputStream(state.tempFile, true).use { fos ->
+                                    fos.write(payload)
+                                }
+                                val chunkIndex = (state.bytesReceived / payload.size).toInt() // Approximation since last chunk might be smaller
+                                state.bytesReceived += payload.size
+                                
+                                Log.i(TAG, "FILE_CHUNK_RECEIVED\nchunkIndex=$chunkIndex\nchunkSize=${payload.size}\nbytesReceived=${state.bytesReceived}\nexpectedFileSize=${state.fileSize}")
+                                
+                                val transportPeerId = peerConn?.peerId ?: peerConn?.tempId
+                                val convId = peerConn?.profile?.userId ?: return
+                                val msgs = dbHelper.getMessagesForConversation(convId)
+                                val chatMsg = msgs.find { it.id == messageId }
+                                
+                                if (state.bytesReceived >= state.fileSize) {
+                                    incomingFiles.remove(messageId)
+                                    val finalDir = getExternalFilesDir(android.os.Environment.DIRECTORY_DOCUMENTS)
