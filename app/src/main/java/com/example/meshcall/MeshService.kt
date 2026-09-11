@@ -66,6 +66,7 @@ class MeshService : Service(), WifiDirectListener {
     private lateinit var wifiDirectManager: WifiDirectManager
     private var socketManager: SocketManager? = null
     val routeManager = RouteManager()
+    private var routingBroadcastJob: kotlinx.coroutines.Job? = null
     private lateinit var callAudioEngine: CallAudioEngine
     private lateinit var callRingtoneManager: CallRingtoneManager
     
@@ -288,6 +289,7 @@ class MeshService : Service(), WifiDirectListener {
                 observer?.onCallStateChanged(state, profile, isCaller)
             }
         })
+        startPeriodicRoutingBroadcast()
     }
 
     fun setCallMuted(muted: Boolean) {
@@ -355,6 +357,7 @@ class MeshService : Service(), WifiDirectListener {
     override fun onDestroy() {
         super.onDestroy()
         Log.i(TAG, "MeshService onDestroy")
+        routingBroadcastJob?.cancel()
         try {
             unregisterReceiver(debugReceiver)
         } catch (e: Exception) {
@@ -1067,6 +1070,18 @@ private fun handleSocketDataReceived(type: Int, messageId: String, payload: Byte
             
             if (state == AppConnectionState.SESSION_ACTIVE || state == AppConnectionState.DISCONNECTED) {
                 broadcastRoutingUpdate()
+            }
+        }
+    }
+
+    private fun startPeriodicRoutingBroadcast() {
+        routingBroadcastJob?.cancel()
+        routingBroadcastJob = kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            while (true) {
+                kotlinx.coroutines.delay(15_000L)
+                if (peerManager.getAllConnections().isNotEmpty()) {
+                    broadcastRoutingUpdate()
+                }
             }
         }
     }

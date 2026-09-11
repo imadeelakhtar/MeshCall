@@ -22,7 +22,7 @@ class RouteManager {
     private val packetCache = ConcurrentHashMap<String, Long>()
     
     // Time-to-live for a route in milliseconds (30 seconds)
-    private val ROUTE_TIMEOUT_MS = 30_000L
+    private val ROUTE_TIMEOUT_MS = 45_000L
 
     fun addOrUpdateRoute(destinationUserId: String, destinationMacAddress: String = "", nextHopPeerId: String, hopCount: Int = 1) {
         val existing = routingTable[destinationUserId]
