@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingStart="16dp"
     android:paddingEnd="64dp"
-    android:paddingTop="2dp"
-    android:paddingBottom="2dp">
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
 
     <TextView
         android:id="@+id/textDateHeader"
@@ -32,95 +33,191 @@
         android:orientation="vertical"
         android:gravity="start">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="260dp"
             android:layout_height="wrap_content"
-            android:maxWidth="280dp"
-            android:background="@drawable/bg_chat_received_premium"
-            android:orientation="vertical"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
-            android:elevation="1dp">
-
-            <!-- Map Card -->
-            <FrameLayout
-                android:layout_width="220dp"
-                android:layout_height="140dp"
-                android:layout_marginBottom="8dp"
-                android:background="@drawable/bg_map_placeholder">
-
-                <!-- Simple Map grid simulation or placeholder -->
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:alpha="0.2"
-                    android:src="@drawable/ic_baseline_person_24" />
-
-                <!-- Location Pin -->
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_location_pin" />
-
-                <!-- Coordinates overlay -->
-                <TextView
-                    android:id="@+id/textCoordinates"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:background="#80000000"
-                    android:padding="4dp"
-                    android:gravity="center"
-                    android:textSize="10sp"
-                    android:textColor="#FFFFFF"
-                    tools:text="37.7749, -122.4194" />
-            </FrameLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:text="Shared Location" />
-                
-            <Button
-                android:id="@+id/buttonOpenMap"
-                android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="4dp"
-                android:backgroundTint="#33FFFFFF"
-                android:textColor="#FFFFFF"
-                android:textSize="12sp"
-                android:text="Open Map" />
+            app:cardBackgroundColor="#1A1A1E"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#33FFFFFF"
+            android:layout_marginBottom="2dp">
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="bottom|start">
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/textTimestamp"
-                    android:layout_width="wrap_content"
+                <!-- Map Preview -->
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="130dp"
+                    android:background="#222226">
+
+                    <!-- Radius circle -->
+                    <View
+                        android:layout_width="90dp"
+                        android:layout_height="90dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_glass_circle_active"
+                        android:alpha="0.2" />
+
+                    <!-- Location Pin -->
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_location_pin" />
+                </FrameLayout>
+
+                <!-- Info Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="10sp"
-                    android:textColor="#B3FFFFFF"
-                    tools:text="10:42" />
-                    
-                <TextView
-                    android:id="@+id/textState"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:textSize="10sp"
-                    android:textColor="#B3FFFFFF"
-                    tools:text="✓" />
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_location_pin"
+                            app:tint="@color/meshcall_primary_variant" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginStart="12dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Shared Location"
+                                android:textColor="#FFFFFF"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/textCoordinates"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textColor="#A0A0A0"
+                                android:textSize="12sp"
+                                tools:text="37.7749, -122.4194" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Buttons Row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="16dp"
+                        android:weightSum="2">
+
+                        <!-- Open in Maps -->
+                        <LinearLayout
+                            android:id="@+id/buttonOpenMap"
+                            android:layout_width="0dp"
+                            android:layout_height="42dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="6dp"
+                            android:background="@drawable/bg_glass_pill"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/ic_location_pin"
+                                app:tint="#FFFFFF" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:text="Open in Maps"
+                                android:textColor="#FFFFFF"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Copy Coords -->
+                        <LinearLayout
+                            android:id="@+id/buttonCopyCoords"
+                            android:layout_width="0dp"
+                            android:layout_height="42dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="6dp"
+                            android:background="@drawable/bg_glass_pill"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:src="@drawable/ic_document_premium"
+                                app:tint="#FFFFFF" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:text="Copy Coords"
+                                android:textColor="#FFFFFF"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Timestamp and Status -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="12dp"
+                        android:layout_gravity="end"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:layout_marginEnd="4dp"
+                            android:src="@android:drawable/ic_menu_recent_history"
+                            app:tint="#B3FFFFFF" />
+
+                        <TextView
+                            android:id="@+id/textTimestamp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="11sp"
+                            android:textColor="#B3FFFFFF"
+                            tools:text="10:42" />
+
+                        <TextView
+                            android:id="@+id/textState"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:textSize="11sp"
+                            android:textColor="#B3FFFFFF"
+                            tools:text="✓" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/textReactions"
@@ -134,10 +231,9 @@
             android:textSize="12sp"
             android:textColor="#FFFFFF"
             android:visibility="gone"
-            android:layout_marginTop="-10dp"
-            android:layout_marginStart="8dp"
-            android:elevation="2dp" />
+            android:layout_marginTop="-12dp"
+            android:layout_marginStart="12dp"
+            android:elevation="4dp" />
 
     </LinearLayout>
-
 </LinearLayout>

@@ -57,7 +57,7 @@ class MeshService : Service(), WifiDirectListener {
     private val MESSAGE_CHANNEL_ID = "MeshCallMessageChannel"
     private val MESSAGE_NOTIFICATION_ID = 2
 
-    private val CALL_CHANNEL_ID = "MeshCallCallsChannel"
+    private val CALL_CHANNEL_ID = "MeshCallCallsChannelV3"
     private val CALL_NOTIFICATION_ID = 3
 
     private val binder = LocalBinder()
@@ -1350,9 +1350,14 @@ private fun handleSocketDataReceived(type: Int, messageId: String, payload: Byte
     }
 
     private fun showIncomingCallNotification(profile: UserProfile?) {
-        val intent = Intent(this, MainActivity::class.java).apply {
+        val callerName = profile?.displayName?.ifEmpty { profile.username } ?: "Unknown Caller"
+        val callerUsername = profile?.username ?: "unknown"
+
+        val intent = Intent(this, IncomingCallActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            putExtra(EXTRA_OPEN_ACTIVE_CALL, true)
+            putExtra("EXTRA_CALLER_NAME", callerName)
+            putExtra("EXTRA_CALLER_USERNAME", callerUsername)
+            putExtra("EXTRA_CALLER_AVATAR", profile?.avatarUri)
         }
         val pendingIntent = android.app.PendingIntent.getActivity(
             this, 0, intent, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
@@ -1371,9 +1376,6 @@ private fun handleSocketDataReceived(type: Int, messageId: String, payload: Byte
         val declinePendingIntent = android.app.PendingIntent.getService(
             this, 2, declineIntent, android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
         )
-
-        val callerName = profile?.displayName?.ifEmpty { profile.username } ?: "Unknown Caller"
-
         val notification = NotificationCompat.Builder(this, CALL_CHANNEL_ID)
             .setContentTitle("Incoming Call")
             .setContentText(callerName)
@@ -1381,6 +1383,7 @@ private fun handleSocketDataReceived(type: Int, messageId: String, payload: Byte
             .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_CALL)
             .setFullScreenIntent(pendingIntent, true)
+            .setContentIntent(pendingIntent)
             .addAction(R.drawable.ic_call_accept, "Accept", acceptPendingIntent)
             .addAction(R.drawable.ic_call_end, "Decline", declinePendingIntent)
             .setOngoing(true)

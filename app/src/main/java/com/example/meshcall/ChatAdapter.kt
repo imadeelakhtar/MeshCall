@@ -441,7 +441,8 @@ class ChatAdapter(private val voicePlayer: VoicePlayer) : RecyclerView.Adapter<R
 
     inner class LocationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val textCoordinates: TextView? = itemView.findViewById(R.id.textCoordinates)
-        private val buttonOpenMap: android.widget.Button? = itemView.findViewById(R.id.buttonOpenMap)
+        private val buttonOpenMap: android.view.View? = itemView.findViewById(R.id.buttonOpenMap)
+        private val buttonCopyCoords: android.view.View? = itemView.findViewById(R.id.buttonCopyCoords)
         private val textTimestamp: TextView? = itemView.findViewById(R.id.textTimestamp)
         private val textState: TextView? = itemView.findViewById(R.id.textState)
         private val textDateHeader: TextView? = itemView.findViewById(R.id.textDateHeader)
@@ -469,6 +470,15 @@ class ChatAdapter(private val voicePlayer: VoicePlayer) : RecyclerView.Adapter<R
                     } catch (e: Exception) {
                         android.widget.Toast.makeText(itemView.context, "Failed to open map", android.widget.Toast.LENGTH_SHORT).show()
                     }
+                }
+            }
+
+            buttonCopyCoords?.setOnClickListener {
+                if (parsed != null) {
+                    val clipboard = itemView.context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                    val clip = android.content.ClipData.newPlainText("Coordinates", "${parsed.first}, ${parsed.second}")
+                    clipboard.setPrimaryClip(clip)
+                    android.widget.Toast.makeText(itemView.context, "Coordinates copied", android.widget.Toast.LENGTH_SHORT).show()
                 }
             }
 

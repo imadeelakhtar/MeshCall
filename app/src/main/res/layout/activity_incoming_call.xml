@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/meshcall_bg_dark">
+
+    <TextView
+        android:id="@+id/textIncomingCallLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:text="Incoming MeshCall"
+        android:textColor="@color/meshcall_text_secondary_dark"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageCallerAvatar"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="48dp"
+        android:background="@drawable/bg_glass_circle"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_baseline_person_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textIncomingCallLabel" />
+
+    <TextView
+        android:id="@+id/textCallerName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:textColor="@color/meshcall_text_primary_dark"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imageCallerAvatar"
+        tools:text="John Doe" />
+
+    <TextView
+        android:id="@+id/textCallerUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/meshcall_text_secondary_dark"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textCallerName"
+        tools:text="@john_doe" />
+
+    <!-- Accept Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/buttonAccept"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="64dp"
+        android:layout_marginStart="64dp"
+        app:backgroundTint="@color/meshcall_call_accept"
+        app:tint="@color/meshcall_on_primary"
+        app:fabCustomSize="72dp"
+        app:maxImageSize="36dp"
+        android:src="@drawable/ic_call_accept"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Decline Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/buttonDecline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="64dp"
+        android:layout_marginEnd="64dp"
+        app:backgroundTint="@color/meshcall_call_decline"
+        app:tint="@color/meshcall_on_primary"
+        app:fabCustomSize="72dp"
+        app:maxImageSize="36dp"
+        android:src="@drawable/ic_call_end"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Accept"
+        android:textColor="@color/meshcall_text_primary_dark"
+        app:layout_constraintEnd_toEndOf="@id/buttonAccept"
+        app:layout_constraintStart_toStartOf="@id/buttonAccept"
+        app:layout_constraintTop_toBottomOf="@id/buttonAccept" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Decline"
+        android:textColor="@color/meshcall_text_primary_dark"
+        app:layout_constraintEnd_toEndOf="@id/buttonDecline"
+        app:layout_constraintStart_toStartOf="@id/buttonDecline"
+        app:layout_constraintTop_toBottomOf="@id/buttonDecline" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

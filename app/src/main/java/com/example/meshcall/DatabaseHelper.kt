@@ -195,11 +195,11 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         
         while (cursor.moveToNext()) {
             list.add(Conversation(
-                peerUserId = cursor.getString(cursor.getColumnIndexOrThrow(COL_CONV_ID)),
-                peerUsername = cursor.getString(cursor.getColumnIndexOrThrow(COL_CONV_USERNAME)),
-                peerDisplayName = cursor.getString(cursor.getColumnIndexOrThrow(COL_CONV_DISPLAY_NAME)),
-                peerAvatarUri = cursor.getString(cursor.getColumnIndexOrThrow(COL_CONV_AVATAR_URI)),
-                lastMessage = cursor.getString(cursor.getColumnIndexOrThrow(COL_CONV_LAST_MESSAGE)),
+                peerUserId = cursor.getString(cursor.getColumnIndexOrThrow(COL_CONV_ID)) ?: "",
+                peerUsername = cursor.getString(cursor.getColumnIndexOrThrow(COL_CONV_USERNAME)) ?: "",
+                peerDisplayName = cursor.getString(cursor.getColumnIndexOrThrow(COL_CONV_DISPLAY_NAME)) ?: "",
+                peerAvatarUri = cursor.getString(cursor.getColumnIndexOrThrow(COL_CONV_AVATAR_URI)) ?: "",
+                lastMessage = cursor.getString(cursor.getColumnIndexOrThrow(COL_CONV_LAST_MESSAGE)) ?: "",
                 lastMessageType = cursor.getInt(cursor.getColumnIndexOrThrow(COL_CONV_LAST_MSG_TYPE)),
                 lastMessageTimestamp = cursor.getLong(cursor.getColumnIndexOrThrow(COL_CONV_LAST_MSG_TIME)),
                 unreadCount = cursor.getInt(cursor.getColumnIndexOrThrow(COL_CONV_UNREAD))

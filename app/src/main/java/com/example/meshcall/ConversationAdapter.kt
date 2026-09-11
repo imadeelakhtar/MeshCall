@@ -57,8 +57,10 @@ class ConversationAdapter(
             }
 
             if (conversation.isConnected) {
-                viewConnectionStatus.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#4CAF50")) // Green
+                viewConnectionStatus.setBackgroundResource(R.drawable.bg_status_online)
+                viewConnectionStatus.backgroundTintList = null
             } else {
+                viewConnectionStatus.setBackgroundResource(R.drawable.bg_glass_circle)
                 viewConnectionStatus.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#B0B0B0")) // Gray
             }
 

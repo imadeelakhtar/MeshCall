@@ -83,6 +83,14 @@
             tools:replace="android:theme" />
 
         <activity
+            android:name=".IncomingCallActivity"
+            android:exported="false"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.MeshCall" />
+
+        <activity
             android:name=".OfflineMapActivity"
             android:exported="false"
             android:theme="@style/Theme.MeshCall" />
