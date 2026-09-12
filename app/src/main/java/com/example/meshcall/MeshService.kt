@@ -748,19 +748,19 @@ private fun handleSocketDataReceived(type: Int, messageId: String, payload: Byte
                 appDisconnect(peerConn?.peerId ?: peerConn?.tempId)
             }
             SocketManager.TYPE_CALL_REQUEST -> {
-                val convId = peerConn?.profile?.userId ?: return
+                val convId = peerConn?.profile?.userId ?: sourceUserId ?: return
                 callManager.onCallRequestReceived(convId)
             }
             SocketManager.TYPE_CALL_ACCEPT -> {
-                val convId = peerConn?.profile?.userId ?: return
+                val convId = peerConn?.profile?.userId ?: sourceUserId ?: return
                 callManager.onCallAcceptReceived(convId)
             }
             SocketManager.TYPE_CALL_DECLINE -> {
-                val convId = peerConn?.profile?.userId ?: return
+                val convId = peerConn?.profile?.userId ?: sourceUserId ?: return
                 callManager.onCallDeclineReceived(convId)
             }
             SocketManager.TYPE_CALL_END -> {
-                val convId = peerConn?.profile?.userId ?: return
+                val convId = peerConn?.profile?.userId ?: sourceUserId ?: return
                 callManager.onCallEndReceived(convId)
             }
             SocketManager.TYPE_IDENTITY_EXCHANGE -> {
@@ -786,10 +786,11 @@ private fun handleSocketDataReceived(type: Int, messageId: String, payload: Byte
                         val obj = jsonArray.getJSONObject(i)
                         val userId = obj.getString("userId")
                         val mac = obj.getString("mac")
+                        val hopCount = obj.optInt("hopCount", 1)
                         
-                        if (userId != profileManager.getProfile()?.userId) {
-                            routeManager.addOrUpdateRoute(userId, mac, incomingPeerId, 2)
-                            Log.i(TAG, "INDIRECT ROUTING MAPPED: Discovered device $mac mapped to userId $userId")
+                        if (userId != profileManager.getProfile()?.userId && !isDirectlyConnected(userId)) {
+                            routeManager.addOrUpdateRoute(userId, mac, incomingPeerId, hopCount + 1)
+                            Log.i(TAG, "INDIRECT ROUTING MAPPED: Discovered device $mac mapped to userId $userId with hops=${hopCount + 1}")
                         }
                     }
                 } catch (e: Exception) {
@@ -842,7 +843,7 @@ private fun handleSocketDataReceived(type: Int, messageId: String, payload: Byte
                     val audioFile = java.io.File(cacheDir, "voice_rx_${System.currentTimeMillis()}.m4a")
                     audioFile.writeBytes(payload)
                     val transportPeerId = peerConn?.peerId ?: peerConn?.tempId
-                    val convId = peerConn?.profile?.userId ?: return
+                    val convId = peerConn?.profile?.userId ?: sourceUserId ?: return
                     val isChatOpen = (activeConversationId == convId)
                     val chatMsg = ChatMessage(
                         id = messageId,
@@ -930,7 +931,7 @@ private fun handleSocketDataReceived(type: Int, messageId: String, payload: Byte
                 val tempFile = java.io.File(finalDir, "rx_${messageId}.tmp")
                 incomingFiles[messageId] = IncomingFileState(tempFile, fileName, mimeType, fileSize, 0L)
                 val type = if (mimeType.startsWith("image/")) MessageType.IMAGE else MessageType.FILE
-                val convId = peerConn?.profile?.userId ?: return
+                val convId = peerConn?.profile?.userId ?: sourceUserId ?: return
                 val chatMsg = ChatMessage(
                     id = messageId,
                     conversationId = convId,
@@ -950,7 +951,7 @@ private fun handleSocketDataReceived(type: Int, messageId: String, payload: Byte
                 try {
                     java.io.FileOutputStream(state.tempFile, true).use { fos -> fos.write(payload) }
                     state.bytesReceived += payload.size
-                    val convId = peerConn?.profile?.userId ?: return
+                    val convId = peerConn?.profile?.userId ?: sourceUserId ?: return
                     if (state.bytesReceived >= state.fileSize) {
                         incomingFiles.remove(messageId)
                         val finalDir = getExternalFilesDir(android.os.Environment.DIRECTORY_DOCUMENTS)
@@ -1039,8 +1040,8 @@ private fun handleSocketDataReceived(type: Int, messageId: String, payload: Byte
             return
         }
         
-        val nextHopPeerId = routeManager.getNextHopFor(packet.destinationId) 
-            ?: peerManager.getConnectionByUserId(packet.destinationId)?.let { it.peerId ?: it.tempId }
+        val nextHopPeerId = peerManager.getConnectionByUserId(packet.destinationId)?.let { it.peerId ?: it.tempId }
+            ?: routeManager.getNextHopFor(packet.destinationId)
             
         if (nextHopPeerId == null) {
             Log.i(TAG, "Dropped MeshPacket: No route to destination ${packet.destinationId}")
@@ -1090,31 +1091,58 @@ private fun handleSocketDataReceived(type: Int, messageId: String, payload: Byte
         val myProfile = profileManager.getProfile() ?: return
         val directConns = peerManager.getAllConnections().filter { getAppConnectionState(it.peerId ?: it.tempId) == AppConnectionState.SESSION_ACTIVE }
         
-        val routingDataList = mutableListOf<org.json.JSONObject>()
-        for (conn in directConns) {
-            val profile = conn.profile ?: continue
-            val mac = conn.peerId ?: continue // We need MAC to resolve WifiP2pDevice
-            val routeObj = org.json.JSONObject().apply {
-                put("userId", profile.userId)
-                put("mac", mac)
+        for (targetConn in directConns) {
+            val targetPeerId = targetConn.peerId ?: targetConn.tempId ?: continue
+            val routingDataList = mutableListOf<org.json.JSONObject>()
+            val addedUserIds = mutableSetOf<String>()
+            
+            // 1. Advertise direct connections
+            for (conn in directConns) {
+                if (conn == targetConn) continue // Do not advertise target back to itself
+                val profile = conn.profile ?: continue
+                val mac = conn.peerId ?: continue
+                val routeObj = org.json.JSONObject().apply {
+                    put("userId", profile.userId)
+                    put("mac", mac)
+                    put("hopCount", 1)
+                }
+                routingDataList.add(routeObj)
+                addedUserIds.add(profile.userId)
             }
-            routingDataList.add(routeObj)
-        }
-        
-        if (routingDataList.isEmpty()) return
-        
-        val updatePayload = org.json.JSONArray(routingDataList).toString()
-        
-        for (conn in directConns) {
-            val peerId = conn.peerId ?: conn.tempId ?: continue
-            socketManager?.sendControlMessage(SocketManager.TYPE_ROUTING_UPDATE, UUID.randomUUID().toString(), updatePayload, peerId)
-            Log.i(TAG, "INDIRECT ROUTING ADVERTISEMENT SENT: Sent routing update to $peerId with ${routingDataList.size} destinations")
+            
+            // 2. Advertise indirect routes
+            val indirectRoutes = routeManager.getAllRoutes()
+            for (route in indirectRoutes) {
+                if (route.nextHopPeerId == targetPeerId) continue // Split Horizon
+                
+                if (!addedUserIds.contains(route.destinationUserId) && route.destinationUserId != myProfile.userId) {
+                    val routeObj = org.json.JSONObject().apply {
+                        put("userId", route.destinationUserId)
+                        put("mac", route.destinationMacAddress)
+                        put("hopCount", route.hopCount)
+                    }
+                    routingDataList.add(routeObj)
+                    addedUserIds.add(route.destinationUserId)
+                }
+            }
+            
+            if (routingDataList.isNotEmpty()) {
+                val updatePayload = org.json.JSONArray(routingDataList).toString()
+                socketManager?.sendControlMessage(SocketManager.TYPE_ROUTING_UPDATE, UUID.randomUUID().toString(), updatePayload, targetPeerId)
+                Log.i(TAG, "INDIRECT ROUTING ADVERTISEMENT SENT: Sent routing update to $targetPeerId with ${routingDataList.size} destinations")
+            }
         }
     }
 
     fun getAppConnectionState(peerId: String?): AppConnectionState {
         if (peerId == null) return AppConnectionState.DISCONNECTED
         return appConnectionStates[peerId] ?: AppConnectionState.DISCONNECTED
+    }
+    
+    private fun isDirectlyConnected(userId: String): Boolean {
+        return peerManager.getAllConnections().any { 
+            it.profile?.userId == userId && getAppConnectionState(it.peerId ?: it.tempId) == AppConnectionState.SESSION_ACTIVE 
+        }
     }
     
     fun sendConnectionRequest(targetPeerId: String?) {
@@ -1125,7 +1153,8 @@ private fun handleSocketDataReceived(type: Int, messageId: String, payload: Byte
     }
 
     fun sendViaMeshRoute(destinationUserId: String, type: Int, messageId: String, payload: ByteArray) {
-        val nextHopPeerId = routeManager.getNextHopFor(destinationUserId) ?: return
+        val nextHopPeerId = peerManager.getConnectionByUserId(destinationUserId)?.let { it.peerId ?: it.tempId }
+            ?: routeManager.getNextHopFor(destinationUserId) ?: return
         val myUserId = profileManager.getProfile()?.userId ?: return
         
         val meshPacket = MeshPacket(
@@ -1219,6 +1248,9 @@ private fun handleSocketDataReceived(type: Int, messageId: String, payload: Byte
             } catch (e: Exception) {}
             peerManager.removeConnection(conn)
         }
+        
+        routeManager.removeRoutesVia(targetPeerId)
+        setAppConnectionState(AppConnectionState.DISCONNECTED, targetPeerId)
         
         if (userId != null) {
             callManager.onConnectionLost(userId)

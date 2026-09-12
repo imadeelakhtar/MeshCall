@@ -498,17 +498,23 @@ class MainActivity : AppCompatActivity(), MeshServiceObserver {
         }
 
         buttonSend.setOnClickListener {
-            val state = meshService?.getAppConnectionState(meshService?.peerManager?.getConnectionByUserId(activeConversationId ?: "")?.peerId)
-            if (state == AppConnectionState.SESSION_ACTIVE && activeConversationId != null) {
-                val messageText = editTextMessage.text.toString().trim()
-                if (messageText.isNotEmpty()) {
-                    android.util.Log.i("MeshCall_CrashTrace", "TEXT_SEND_CLICK")
-                    try {
-                        meshService?.sendMessage(messageText, activeConversationId)
-                        editTextMessage.text.clear()
-                    } catch (e: Exception) {
-                        android.util.Log.e("MeshCall_CrashTrace", "FATAL EXCEPTION in MainActivity: ${e.message}\n${android.util.Log.getStackTraceString(e)}")
-                        throw e
+            val convId = activeConversationId
+            if (convId != null) {
+                val state = meshService?.getAppConnectionState(meshService?.peerManager?.getConnectionByUserId(convId)?.peerId)
+                val isDirectlyConnected = state == AppConnectionState.SESSION_ACTIVE
+                val hasMeshRoute = meshService?.routeManager?.hasRouteTo(convId) == true
+
+                if (isDirectlyConnected || hasMeshRoute) {
+                    val messageText = editTextMessage.text.toString().trim()
+                    if (messageText.isNotEmpty()) {
+                        android.util.Log.i("MeshCall_CrashTrace", "TEXT_SEND_CLICK")
+                        try {
+                            meshService?.sendMessage(messageText, convId)
+                            editTextMessage.text.clear()
+                        } catch (e: Exception) {
+                            android.util.Log.e("MeshCall_CrashTrace", "FATAL EXCEPTION in MainActivity: ${e.message}\n${android.util.Log.getStackTraceString(e)}")
+                            throw e
+                        }
                     }
                 }
             }

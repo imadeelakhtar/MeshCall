@@ -28,6 +28,11 @@ class RouteManager {
         val existing = routingTable[destinationUserId]
         // Prefer direct or fewer hops, but always update the timestamp if it's the same nextHop
         if (existing == null || existing.hopCount > hopCount || existing.nextHopPeerId == nextHopPeerId) {
+            if (existing != null && existing.nextHopPeerId == nextHopPeerId && existing.hopCount == hopCount) {
+                // Just refresh timestamp to prevent route churn log spam
+                routingTable[destinationUserId] = existing.copy(lastUpdateTime = System.currentTimeMillis())
+                return
+            }
             routingTable[destinationUserId] = RouteInfo(destinationUserId, destinationMacAddress, nextHopPeerId, hopCount, System.currentTimeMillis())
             Log.i(TAG, "Route added/updated: dest=$destinationUserId (mac=$destinationMacAddress) via nextHop=$nextHopPeerId (hops=$hopCount)")
         }
@@ -87,5 +92,10 @@ class RouteManager {
     fun getAllReachableUserIds(): List<String> {
         cleanupStaleRoutes()
         return routingTable.keys().toList()
+    }
+
+    fun getAllRoutes(): List<RouteInfo> {
+        cleanupStaleRoutes()
+        return routingTable.values.toList()
     }
 }
